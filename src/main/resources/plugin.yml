@@ -3,6 +3,7 @@ description: Turn redstone lamps on with one click
 author: StarTux
 version: 0.1
 main: com.winthier.lightswitch.LightSwitchPlugin
+softdepend: [ Claims ]
 commands: {}
 permissions:
   lightswitch.switch:

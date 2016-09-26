@@ -1,14 +1,14 @@
 package com.winthier.lightswitch;
 
 import com.winthier.claims.Claims;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -28,29 +28,30 @@ public class LightSwitchPlugin extends JavaPlugin implements Listener {
         getServer().getPluginManager().registerEvents(this, this);
     }
 
-    @Override
-    public void onDisable() {
-    }
-
-    @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String args[]) {
-        return false;
-    }
-
+    final BlockFace[] dirs = {BlockFace.DOWN, BlockFace.UP, BlockFace.WEST, BlockFace.EAST, BlockFace.NORTH, BlockFace.SOUTH};
     @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
     public void onPlayerInteract(PlayerInteractEvent event)
     {
         if (!event.getPlayer().hasPermission("lightswitch.switch")) return;
         if (event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
-        Block block = event.getClickedBlock();
+        final Block block = event.getClickedBlock();
         if (block.getType() != Material.REDSTONE_LAMP_OFF) return;
-        if (event.getPlayer().getItemInHand().getType() != Material.AIR) return;
+        if (event.getPlayer().getInventory().getItemInMainHand().getType() != Material.AIR) return;
+        if (event.getPlayer().getInventory().getItemInOffHand().getType() != Material.AIR) return;
         if (getServer().getPluginManager().getPlugin("Claims") != null && !Claims.getInstance().canBuild(event.getPlayer().getUniqueId(), block.getWorld().getName(), block.getX(), block.getY(), block.getZ())) return;
+        Block neighbor = null;
+        for (BlockFace dir: dirs) {
+            Block nbor = block.getRelative(dir);
+            if (nbor.getType() == Material.AIR) {
+                neighbor = nbor;
+                break;
+            }
+        }
+        if (neighbor == null) return;
         blocks.add(block);
         event.setCancelled(true);
-        block = block.getRelative(0, -1, 0);
-        BlockState state = block.getState();
-        block.setType(Material.REDSTONE_BLOCK);
+        BlockState state = neighbor.getState();
+        neighbor.setType(Material.REDSTONE_BLOCK);
         state.update(true, false);
     }
 
