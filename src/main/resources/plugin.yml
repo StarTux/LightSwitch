@@ -1,0 +1,10 @@
+name: LightSwitch
+description: Turn redstone lamps on with one click
+author: StarTux
+version: 0.1
+main: com.winthier.lightswitch.LightSwitchPlugin
+commands: {}
+permissions:
+  lightswitch.switch:
+    description: Switch redstone lamps on
+    default: op
